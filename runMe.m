@@ -6,13 +6,18 @@
 % I can reconstruct all prior years easily if needed either by cutting and
 % pasting from prior exports or just exporting new from readcube
 
-rec = loadRIS('export_2024-8-17_2023.ris', 1);
+rec = loadRIS('export_2024-8-20_2017.ris', 1);
 
 
 %%
 % Adjaceny Matrix for Desired Authors
 yearTarget = 2024;
 
+% What do I do about Faculty who have left NPC?
+% I guess I can leave them at least for a few years since they're
+% interactions take awhile to publish.
+% But I do ever remove them, then it messes up things if I go back in
+% time... this would suggest I need a year range for membership for each author... hmm...
 namesAuthors = [{'Awad, L'},{'Bifano, T'},{'Bigio, I'},{'Boas, D'},{'Chen, A'},... %5
     {'Chen, J'},{'Cheng, J'},{'Chung, D'},{'Cronin-Golomb, A'},{'Cruz-Martin, A'},... %10
     {'Davison, I'},{'Demas, J'},{'Dennis, A'},{'Devor, A'},{'Economo, M'},{'Emili, A'},...%16 {'Fawcett, H'},{'Ferre, C'},...
@@ -25,14 +30,14 @@ namesAuthors = [{'Awad, L'},{'Bifano, T'},{'Bigio, I'},{'Boas, D'},{'Chen, A'},.
     {'Yucel, M'},... %43
     {'Cheng, X'},{'Ferre, C'},{'DePasquale, B'},{'Gavornik, J'},{'Kumar, D'},{'O''Shea, T'},... %49
     {'Russek, S'},{'Thunemann, M'},{'Wallace, M'},{'Wang, T'},{'Yang, C'},{'Younger, M'},... %55
-    {'Stangl, M'},... %56
+    {'Stangl, M','Ellis, T','Greer, D','Luebke, J','Rosene, D','Stephen, E','TCW, J'},... %62
     {'Yücel, M'},{'Cruz-Martín, A'},{'Kılıç, K'},{'Chen, I'}];
 
 % second column of duplicates must go in descending order. And duplicates must all be at end
-duplicateNames = [5 60;... % Chen
-                  23 59;... % Kilic
-                  10 58;... % Cruz-Martin
-                  43 57];   % Yucel
+duplicateNames = [5 66;... % Chen
+                  23 65;... % Kilic
+                  10 64;... % Cruz-Martin
+                  43 63];   % Yucel
 
 % make sure I manually delete abstracts and other non-sense inreadcube
 % before exporting the ris file
@@ -196,8 +201,8 @@ end
 %%
 % Load adjacency for each year
 
-for ii=1:6
-    [AuthorAdjAll{ii},AuthorNames,boo,rec1] = loadRIS_Adjacency_NPC(rec,namesAuthors,2016+ii);
+for ii=1:2
+    [AuthorAdjAll{ii},AuthorNames,boo,boo1,rec1] = loadRIS_Adjacency_NPC(rec,namesAuthors,2022+ii);
     
     % remove duplicate names
     lstCollabPubs = find(rec1.isCollaborative==1);
@@ -217,7 +222,7 @@ end
 
 %%
 % create a graph from adjacency matrix
-iYear = 1;
+iYear = 2;
 
 lstA = lstAll{iYear};
 AuthorAdj = AuthorAdjAll{iYear};
@@ -259,7 +264,12 @@ clf
 %%
 % evolve the node positions
 
-for ii = 1:1
+if 0 % randomize positions a little
+    pos = pos + rand(size(pos)) * 1;
+end
+
+
+for ii = 1:100
     nIterMax = 10;
     pos = graphForces( pos, AuthorAdjAll{iYear}, lstA, nIterMax );
     
@@ -305,7 +315,7 @@ for ii = 1:1
     for jj=1:nAuthors
         if ismember(jj,lstA)
             if 1
-                he = text( pos(jj,1), pos(jj,2), sprintf('%d-%s',jj,AuthorNames{jj}) );
+                he = text( pos(jj,1), pos(jj,2), sprintf('%s',AuthorNames{jj}) );
             else
                 he = text( pos(jj,1), pos(jj,2), sprintf('%s',AuthorNames{jj}) );
             end
